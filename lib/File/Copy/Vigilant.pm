@@ -15,13 +15,9 @@ use Digest::MD5::File qw(file_md5_hex);
 
 File::Copy::Vigilant - Copy and move files with verification and retries
 
-=head1 VERSION
-
-Version 1.01
-
 =cut
 
-our $VERSION = '1.01';
+our $VERSION = '1.2';
 
 =head1 SYNOPSIS
 
@@ -336,7 +332,7 @@ sub move;
 
 =head1 AUTHOR
 
-Anthony Kilna, C<< <anthony at kilna.com> >>
+Anthony Kilna, C<< <anthony at kilna.com> >> - L<http://anthony.kilna.com>
 
 =head1 BUGS
 
@@ -376,18 +372,19 @@ L<http://search.cpan.org/dist/File-Copy-Vigilant>
 
 =back
 
-
 =head1 SEE ALSO
 
 File::Copy - File::Copy::Reliable
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 Anthony Kilna, all rights reserved.
+Copyright 2012 Kilna Companies.
 
 This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
 
+See http://dev.perl.org/licenses/ for more information.
 
 =cut
 

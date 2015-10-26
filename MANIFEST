@@ -10,3 +10,4 @@ t/98-pod.t
 t/99-pod-coverage.t
 t/perlcriticrc
 META.yml
+Makefile.PL
