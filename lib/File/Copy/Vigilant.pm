@@ -17,7 +17,7 @@ File::Copy::Vigilant - Copy and move files with verification and retries
 
 =cut
 
-our $VERSION = '1.2';
+our $VERSION = '1.2.1';
 
 =head1 SYNOPSIS
 
@@ -87,70 +87,62 @@ Or
 
 =cut
 
-sub copy_vigilant
-{
+sub copy_vigilant {
 
-	my ( $source, $dest, %params ) = @_;
+    my ( $source, $dest, %params ) = @_;
 
-	my @errors  = ();
-	my $success = eval {
+    my @errors  = ();
+    my $success = eval {
 
-		my $retries = defined( $params{'retries'} ) ? $params{'retries'} : 2;
-		if ( $retries !~ m/^\d+$/x )
-		{
-			$retries = 'infinite';
-		}    # Blank = continuous
+        my $retries = defined( $params{'retries'} ) ? $params{'retries'} : 2;
+        if ( $retries !~ m/^\d+$/x ) {
+            $retries = 'infinite';
+        }    # Blank = continuous
 
-		my $check
-			= defined( $params{'check'} ) ? lc( $params{'check'} ) : 'md5';
-		if ( $check !~ m/^md5|size|compare|none$/x ) { $check = 'md5'; }
+        my $check
+            = defined( $params{'check'} ) ? lc( $params{'check'} ) : 'md5';
+        if ( $check !~ m/^md5|size|compare|none$/x ) { $check = 'md5'; }
 
-		# This hook allows us to do some whitebox testing by modifying the
-		# results of the copy.  You probably don't want this unless you're
-		# testing this module.
-		my $postcopy = $params{'_postcopy'};
-		if ( defined($postcopy) && ref($postcopy) ne 'CODE' )
-		{
-			$postcopy = undef;
-		}
+        # This hook allows us to do some whitebox testing by modifying the
+        # results of the copy.  You probably don't want this unless you're
+        # testing this module.
+        my $postcopy = $params{'_postcopy'};
+        if ( defined($postcopy) && ref($postcopy) ne 'CODE' ) {
+            $postcopy = undef;
+        }
 
-		my $check_error = _check_files( $source, $dest );
-		if ($check_error)
-		{
-			push @errors, "Pre-copy check failed: $check_error\n";
-			return 0;
-		}
+        my $check_error = _check_files( $source, $dest );
+        if ($check_error) {
+            push @errors, "Pre-copy check failed: $check_error\n";
+            return 0;
+        }
 
-		my $attempt = 0;
-		while ( ( $retries eq 'infinite' ) || ( $attempt++ <= $retries ) )
-		{
+        my $attempt = 0;
+        while ( ( $retries eq 'infinite' ) || ( $attempt++ <= $retries ) ) {
 
-			my $copy_error = _try_copy( $source, $dest, $check, $postcopy );
+            my $copy_error = _try_copy( $source, $dest, $check, $postcopy );
 
-			if ($copy_error)
-			{
-				push @errors, "Copy attempt $attempt failed: $copy_error\n";
-			}
-			else
-			{
-				return 1;
-			}
+            if ($copy_error) {
+                push @errors, "Copy attempt $attempt failed: $copy_error\n";
+            }
+            else {
+                return 1;
+            }
 
-		}
+        }
 
-		# If we got here, then we looped as many times as
-		# we were allowed without a success
-		return 0;
+        # If we got here, then we looped as many times as
+        # we were allowed without a success
+        return 0;
 
-	};
+    };
 
-	if ($@)
-	{
-		$success = 0;
-		push @errors, "Internal error in copy_vigilant: $@\n";
-	}
+    if ($@) {
+        $success = 0;
+        push @errors, "Internal error in copy_vigilant: $@\n";
+    }
 
-	return wantarray ? ( $success, @errors ) : $success;
+    return wantarray ? ( $success, @errors ) : $success;
 
 } ## end sub copy_vigilant
 
@@ -161,116 +153,96 @@ sub cp;
 sub copy;
 *copy = \&copy_vigilant;
 
-sub _check_files
-{
+sub _check_files {
 
-	my ( $source, $dest ) = @_;
+    my ( $source, $dest ) = @_;
 
-	if ( ref $source )
-	{
-		if ( ref($source) eq 'GLOB' ||
-			eval { $source->isa('GLOB') } ||
-			eval { $source->isa('IO::Handle') } )
-		{
-			return "can't use filehandle for source";
-		}
-	}
-	elsif ( ref( \$source ) eq 'GLOB' )
-	{
-		return "can't use filehandle for source";
-	}
+    if ( ref $source ) {
+        if (   ref($source) eq 'GLOB'
+            || eval { $source->isa('GLOB') }
+            || eval { $source->isa('IO::Handle') } )
+        {
+            return "can't use filehandle for source";
+        }
+    }
+    elsif ( ref( \$source ) eq 'GLOB' ) {
+        return "can't use filehandle for source";
+    }
 
-	if ( ref $dest )
-	{
-		if ( ref($dest) eq 'GLOB' ||
-			eval { $dest->isa('GLOB') } ||
-			eval { $dest->isa('IO::Handle') } )
-		{
-			return "Can't use filehandle for desination";
-		}
-	}
-	elsif ( ref( \$dest ) eq 'GLOB' )
-	{
-		return "can't use filehandle for destination";
-	}
+    if ( ref $dest ) {
+        if (   ref($dest) eq 'GLOB'
+            || eval { $dest->isa('GLOB') }
+            || eval { $dest->isa('IO::Handle') } )
+        {
+            return "Can't use filehandle for desination";
+        }
+    }
+    elsif ( ref( \$dest ) eq 'GLOB' ) {
+        return "can't use filehandle for destination";
+    }
 
-	unless ( stat $source )
-	{
-		return "unable to stat source file $source";
-	}
+    unless ( stat $source ) {
+        return "unable to stat source file $source";
+    }
 
-	if ( -d $source )
-	{
-		return "unable to copy directory source $source";
-	}
+    if ( -d $source ) {
+        return "unable to copy directory source $source";
+    }
 
-	unless ( -f $source || -l $source )
-	{
-		return "unable to copy non-file source $source";
-	}
+    unless ( -f $source || -l $source ) {
+        return "unable to copy non-file source $source";
+    }
 
-	# If we got this far then both the source and dest look OK
-	return '';
+    # If we got this far then both the source and dest look OK
+    return '';
 } ## end sub _check_files
 
-sub _try_copy
-{
+sub _try_copy {
 
-	my ( $source, $dest, $check, $postcopy ) = @_;
+    my ( $source, $dest, $check, $postcopy ) = @_;
 
-	my $source_md5  = undef;
-	my $source_size = undef;
-	if ( $check eq 'md5' )
-	{
-		$source_md5 = file_md5_hex($source);
-	}
-	if ( ( $check eq 'md5' ) || ( $check eq 'size' ) )
-	{
-		$source_size = ( stat $source )[7];
-	}
+    my $source_md5  = undef;
+    my $source_size = undef;
+    if ( $check eq 'md5' ) {
+        $source_md5 = file_md5_hex($source);
+    }
+    if ( ( $check eq 'md5' ) || ( $check eq 'size' ) ) {
+        $source_size = ( stat $source )[7];
+    }
 
-	unless ( File::Copy::copy( $source, $dest ) )
-	{
-		return "copy failed: $!";
-	}
+    unless ( File::Copy::copy( $source, $dest ) ) {
+        return "copy failed: $!";
+    }
 
-	defined($postcopy) && $postcopy->(@_);
+    defined($postcopy) && $postcopy->(@_);
 
-	my $dest_size = undef;
-	if ( $check eq 'md5' || $check eq 'size' )
-	{
-		$dest_size = ( stat $dest )[7];
-	}
+    my $dest_size = undef;
+    if ( $check eq 'md5' || $check eq 'size' ) {
+        $dest_size = ( stat $dest )[7];
+    }
 
-	if ( $check eq 'md5' )
-	{
-		if ( $source_size != $dest_size )
-		{
-			return "pre-md5 size check failed";
-		}
-		my $dest_md5 = file_md5_hex($dest);
-		if ( $source_md5 ne $dest_md5 )
-		{
-			return "md5 check failed";
-		}
-	}
-	elsif ( $check eq 'size' )
-	{
-		if ( $source_size != $dest_size )
-		{
-			return "size check failed";
-		}
-	}
-	elsif ( $check eq 'compare' )
-	{
-		if ( File::Compare::compare( $source, $dest ) )
-		{
-			return "file compare failed";
-		}
-	}
+    if ( $check eq 'md5' ) {
+        if ( $source_size != $dest_size ) {
+            return "pre-md5 size check failed";
+        }
+        my $dest_md5 = file_md5_hex($dest);
+        if ( $source_md5 ne $dest_md5 ) {
+            return "md5 check failed";
+        }
+    }
+    elsif ( $check eq 'size' ) {
+        if ( $source_size != $dest_size ) {
+            return "size check failed";
+        }
+    }
+    elsif ( $check eq 'compare' ) {
+        if ( File::Compare::compare( $source, $dest ) ) {
+            return "file compare failed";
+        }
+    }
 
-	# If we got this far then the copy was a success!
-	return '';
+    # If we got this far then the copy was a success!
+    return '';
 } ## end sub _try_copy
 
 =head2 move_vigilant, move, mv
@@ -286,40 +258,36 @@ the use syntax (see copy_vigilant for details).
 
 =cut
 
-sub move_vigilant
-{
+sub move_vigilant {
 
-	my ( $source, $dest, %params ) = @_;
+    my ( $source, $dest, %params ) = @_;
 
-	my ( $copy_success, @copy_errors )
-	  = copy_vigilant( $source, $dest, %params );
+    my ( $copy_success, @copy_errors )
+        = copy_vigilant( $source, $dest, %params );
 
-	unless ($copy_success)
-	{
-		return wantarray ? ( 0, @copy_errors ) : 0;
-	}
+    unless ($copy_success) {
+        return wantarray ? ( 0, @copy_errors ) : 0;
+    }
 
-	my @errors  = ();
-	my $success = eval {
-		if ( unlink $source )
-		{
-			return 1;
-		}
-		else
-		{
-			push @errors, "Unable to remove source $source "
-			  . "(destination file $dest has been left in place)\n";
-			return 0;
-		}
-	};
+    my @errors  = ();
+    my $success = eval {
+        if ( unlink $source )
+        {
+            return 1;
+        }
+        else {
+            push @errors, "Unable to remove source $source "
+                . "(destination file $dest has been left in place)\n";
+            return 0;
+        }
+    };
 
-	if ($@)
-	{
-		$success = 0;
-		push @errors, "Internal error in move_vigilant: $@\n";
-	}
+    if ($@) {
+        $success = 0;
+        push @errors, "Internal error in move_vigilant: $@\n";
+    }
 
-	return wantarray ? ( $success, @errors ) : $success;
+    return wantarray ? ( $success, @errors ) : $success;
 
 }
 
@@ -388,4 +356,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of File::Copy::Vigilant
+1;    # End of File::Copy::Vigilant

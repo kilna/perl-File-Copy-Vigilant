@@ -1,16 +1,20 @@
 Revision history for File-Copy-Vigilant
 
-1.0  - 2009/02/11
+1.0    - 2009/02/11
 
-     * Initial release.
+       * Initial release.
 
-1.01 - 2009/02/15
+1.01   - 2009/02/15
 
-     * Fixed problem with detecting IO::File on source / destination
-	 * Fixed documentation / commenting errors
-	 * Code reformatting
+       * Fixed problem with detecting IO::File on source / destination
+       * Fixed documentation / commenting errors
+	   * Code reformatting
 
-1.2  - 2012/07/10
+1.2    - 2012/07/10
 
-     * Fixed inconsistently numbered version by bumping a minor rev
-	 * Updated license, contact info
+       * Fixed inconsistently numbered version by bumping a minor rev
+       * Updated license, contact info
+
+1.2.1  - 2012/07/11
+
+       * Fixed formatting

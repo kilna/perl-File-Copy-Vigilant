@@ -4,12 +4,12 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 BEGIN {
-	use_ok(
-		'File::Copy::Vigilant',
-		qw( copy_vigilant copy cp move_vigilant move mv )
-	);
-	use_ok( 'File::Temp', qw(:POSIX) );
-	use_ok( 'IO::File' );
+    use_ok(
+        'File::Copy::Vigilant',
+        qw( copy_vigilant copy cp move_vigilant move mv )
+    );
+    use_ok( 'File::Temp', qw(:POSIX) );
+    use_ok( 'IO::File' );
 }
 
 my $from_file = tmpnam();
@@ -91,12 +91,12 @@ unlink $to_file;
 # Test with non-default retries of 3, fail attempt 1, 2, and 3, succeed on 4
 my $counter = 0;
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'retries'   => 3,
-	'_postcopy' => sub {
-		if (++$counter < 4) { write_random_file_contents($to_file); }
-	}
+    $from_file,
+    $to_file,
+    'retries'   => 3,
+    '_postcopy' => sub {
+        if (++$counter < 4) { write_random_file_contents($to_file); }
+    }
 );
 $success || print STDERR '#', join('#', @errors);
 ok($success, "nonstandard retries, fail all tries except last one");
@@ -104,10 +104,10 @@ unlink $to_file;
 
 # Test with bogus code in postcopy, no retries
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'retries'   => 0,
-	'_postcopy' => sub { die; }
+    $from_file,
+    $to_file,
+    'retries'   => 0,
+    '_postcopy' => sub { die; }
 );
 ok(!$success, "fail when we put a die into postcopy");
 unlink $to_file;
@@ -121,25 +121,25 @@ unlink $to_file;
 # Test md5 fails if we modify the destination file contents but not the
 # size, no retries
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'check'     => 'md5',
-	'retries'   => 0,
-	'_postcopy' => sub { write_random_file_contents($to_file); }
+    $from_file,
+    $to_file,
+    'check'     => 'md5',
+    'retries'   => 0,
+    '_postcopy' => sub { write_random_file_contents($to_file); }
 );
 ok(
-	!$success,
-	"fail when we modify the contents but not the size postcopy for md5"
+    !$success,
+    "fail when we modify the contents but not the size postcopy for md5"
 );
 unlink $to_file;
 
 # Test md5 fails if we modify the destination file size, no retries
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'check'     => 'md5',
-	'retries'   => 0,
-	'_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
+    $from_file,
+    $to_file,
+    'check'     => 'md5',
+    'retries'   => 0,
+    '_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
 );
 ok(!$success, "fail when we modify the size postcopy for md5");
 unlink $to_file;
@@ -152,29 +152,29 @@ unlink $to_file;
 
 # Test with size for failure, no retries
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'check'     => 'size',
-	'retries'   => 0,
-	'_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
+    $from_file,
+    $to_file,
+    'check'     => 'size',
+    'retries'   => 0,
+    '_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
 );
 ok(!$success, "fail when we modify the size postcopy for size");
 unlink $to_file;
 
 # Test with compare for success
 ($success, @errors)
-	= copy_vigilant($from_file, $to_file, 'check' => 'compare');
+    = copy_vigilant($from_file, $to_file, 'check' => 'compare');
 $success || print STDERR '#', join('#', @errors);
 ok($success, "copy with compare for success");
 unlink $to_file;
 
 # Test with compare for failure
 ($success, @errors) = copy(
-	$from_file,
-	$to_file,
-	'check'     => 'compare',
-	'retries'   => 0,
-	'_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
+    $from_file,
+    $to_file,
+    'check'     => 'compare',
+    'retries'   => 0,
+    '_postcopy' => sub { write_random_file_contents($to_file, 1024*1024*2); }
 );
 ok(!$success, "fail when we modify the contents postcopy for compare");
 unlink $to_file;
@@ -187,19 +187,19 @@ unlink $to_file;
 
 sub write_random_file_contents
 {
-	my $filename = shift;
-	my $size = defined(shift) || 1024 * 1024 * 4; # Default size 10MB
+    my $filename = shift;
+    my $size = defined(shift) || 1024 * 1024 * 4; # Default size 10MB
 
-	my $str = '';
-	foreach (0..$size)
-	{
-		$str .= (0..9,'A'..'Z','a'..'z')[int rand 62];
-	}
+    my $str = '';
+    foreach (0..$size)
+    {
+        $str .= (0..9,'A'..'Z','a'..'z')[int rand 62];
+    }
 
-	my $OUT;
-	open $OUT, '>', $filename || return 0;
-	print $OUT $str;
-	close $OUT || return 0;
-	
-	return 1;
+    my $OUT;
+    open $OUT, '>', $filename || return 0;
+    print $OUT $str;
+    close $OUT || return 0;
+    
+    return 1;
 }
