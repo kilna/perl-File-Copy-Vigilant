@@ -18,3 +18,9 @@ Revision history for File-Copy-Vigilant
 1.2.1  - 2012/07/11
 
        * Fixed formatting
+
+1.3    - 2016/03/17
+
+       * Updated to use filesystem move when the source and destination
+         are on the same device
+
